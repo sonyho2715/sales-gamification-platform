@@ -1,0 +1,311 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  locations    Location[]
+  users        User[]
+  sales        Sale[]
+  goals        Goal[]
+  starDays     StarDay[]
+  bonusPools   BonusPool[]
+  reports      Report[]
+  categories   ProductCategory[]
+  auditLogs    AuditLog[]
+  dailyPerf    DailyPerformance[]
+
+  @@map("organizations")
+}
+
+model Location {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  code           String   @unique
+  address        String?
+  timezone       String   @default("America/Los_Angeles")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users        User[]
+  sales        Sale[]
+  goals        Goal[]
+  dailyPerf    DailyPerformance[]
+
+  @@map("locations")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  SALESPERSON
+
+  @@map("user_role")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  locationId     String?   @map("location_id")
+  email          String    @unique
+  passwordHash   String    @map("password_hash")
+  firstName      String    @map("first_name")
+  lastName       String    @map("last_name")
+  role           UserRole
+  avatarUrl      String?   @map("avatar_url")
+  hireDate       DateTime? @map("hire_date") @db.Date
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location          Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  sales             Sale[]
+  goals             Goal[]
+  starDays          StarDay[]
+  bonusAllocations  BonusAllocation[]
+  dailyPerformances DailyPerformance[]
+  createdGoals      Goal[]             @relation("GoalCreator")
+  generatedReports  Report[]           @relation("ReportGenerator")
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+model ProductCategory {
+  id                String   @id @default(uuid())
+  organizationId    String   @map("organization_id")
+  name              String
+  code              String
+  trackedForGoals   Boolean  @default(false) @map("tracked_for_goals")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  saleItems    SaleItem[]
+
+  @@map("product_categories")
+}
+
+model Sale {
+  id                String   @id @default(uuid())
+  organizationId    String   @map("organization_id")
+  locationId        String   @map("location_id")
+  userId            String   @map("user_id")
+  transactionNumber String   @unique @map("transaction_number")
+  saleDate          DateTime @db.Date @map("sale_date")
+  saleTime          DateTime @db.Time @map("sale_time")
+  totalAmount       Decimal  @db.Decimal(10, 2) @map("total_amount")
+  fcpAmount         Decimal  @default(0) @db.Decimal(10, 2) @map("fcp_amount")
+  hoursWorked       Decimal  @default(0) @db.Decimal(4, 2) @map("hours_worked")
+  customerName      String?  @map("customer_name")
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        SaleItem[]
+
+  @@index([saleDate])
+  @@index([userId, saleDate])
+  @@index([locationId, saleDate])
+  @@map("sales")
+}
+
+model SaleItem {
+  id                String   @id @default(uuid())
+  saleId            String   @map("sale_id")
+  productCategoryId String?  @map("product_category_id")
+  productName       String   @map("product_name")
+  quantity          Int      @default(1)
+  unitPrice         Decimal  @db.Decimal(10, 2) @map("unit_price")
+  totalPrice        Decimal  @db.Decimal(10, 2) @map("total_price")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  sale            Sale             @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productCategory ProductCategory? @relation(fields: [productCategoryId], references: [id])
+
+  @@map("sale_items")
+}
+
+enum GoalType {
+  MONTHLY_SALES
+  DAILY_SALES
+  FCP_PERCENTAGE
+  SALES_PER_HOUR
+  STAR_DAYS
+
+  @@map("goal_type")
+}
+
+model Goal {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  userId         String?   @map("user_id")
+  locationId     String?   @map("location_id")
+  goalType       GoalType  @map("goal_type")
+  targetValue    Decimal   @db.Decimal(10, 2) @map("target_value")
+  periodStart    DateTime  @db.Date @map("period_start")
+  periodEnd      DateTime  @db.Date @map("period_end")
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location     Location?    @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  creator      User?        @relation("GoalCreator", fields: [createdBy], references: [id])
+
+  @@unique([userId, goalType, periodStart, periodEnd])
+  @@index([userId, periodStart, periodEnd])
+  @@map("goals")
+}
+
+model StarDay {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  starDate       DateTime @db.Date @map("star_date")
+  salesAmount    Decimal  @db.Decimal(10, 2) @map("sales_amount")
+  fcpPercentage  Decimal  @db.Decimal(5, 2) @map("fcp_percentage")
+  criteriaMet    Json     @default("{}") @map("criteria_met")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, starDate])
+  @@map("star_days")
+}
+
+enum BonusPoolStatus {
+  ACTIVE
+  CLOSED
+  DISTRIBUTED
+
+  @@map("bonus_pool_status")
+}
+
+model BonusPool {
+  id                  String           @id @default(uuid())
+  organizationId      String           @map("organization_id")
+  periodStart         DateTime         @db.Date @map("period_start")
+  periodEnd           DateTime         @db.Date @map("period_end")
+  totalPoolAmount     Decimal          @db.Decimal(10, 2) @map("total_pool_amount")
+  maxPercentage       Decimal          @default(3.00) @db.Decimal(5, 2) @map("max_percentage")
+  maxIndividualBonus  Decimal          @default(500.00) @db.Decimal(10, 2) @map("max_individual_bonus")
+  status              BonusPoolStatus  @default(ACTIVE)
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bonusAllocations  BonusAllocation[]
+
+  @@map("bonus_pools")
+}
+
+model BonusAllocation {
+  id               String    @id @default(uuid())
+  bonusPoolId      String    @map("bonus_pool_id")
+  userId           String    @map("user_id")
+  earnedAmount     Decimal   @db.Decimal(10, 2) @map("earned_amount")
+  starDaysCount    Int       @default(0) @map("star_days_count")
+  performanceScore Decimal   @default(0) @db.Decimal(10, 2) @map("performance_score")
+  paidDate         DateTime? @db.Date @map("paid_date")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  bonusPool BonusPool @relation(fields: [bonusPoolId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bonus_allocations")
+}
+
+model DailyPerformance {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  locationId     String   @map("location_id")
+  performanceDate DateTime @db.Date @map("performance_date")
+  totalSales     Decimal  @default(0) @db.Decimal(10, 2) @map("total_sales")
+  totalFcp       Decimal  @default(0) @db.Decimal(10, 2) @map("total_fcp")
+  fcpPercentage  Decimal  @default(0) @db.Decimal(5, 2) @map("fcp_percentage")
+  hoursWorked    Decimal  @default(0) @db.Decimal(4, 2) @map("hours_worked")
+  salesPerHour   Decimal  @default(0) @db.Decimal(10, 2) @map("sales_per_hour")
+  transactionCount Int    @default(0) @map("transaction_count")
+  averageSale    Decimal  @default(0) @db.Decimal(10, 2) @map("average_sale")
+  isStarDay      Boolean  @default(false) @map("is_star_day")
+  rankInLocation Int?     @map("rank_in_location")
+  rankInOrganization Int? @map("rank_in_organization")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, performanceDate])
+  @@index([performanceDate])
+  @@index([userId, performanceDate])
+  @@index([locationId, performanceDate])
+  @@map("daily_performance")
+}
+
+enum ReportType {
+  MORNING_REPORT
+  WEEKLY_SUMMARY
+  MONTHLY_SUMMARY
+
+  @@map("report_type")
+}
+
+model Report {
+  id                 String     @id @default(uuid())
+  organizationId     String     @map("organization_id")
+  reportType         ReportType @map("report_type")
+  reportDate         DateTime   @db.Date @map("report_date")
+  fileUrl            String     @map("file_url")
+  generatedBy        String?    @map("generated_by")
+  generationStatus   String     @default("completed") @map("generation_status")
+  createdAt          DateTime   @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  generator    User?        @relation("ReportGenerator", fields: [generatedBy], references: [id])
+
+  @@map("reports")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String
+  entityType     String   @map("entity_type")
+  entityId       String?  @map("entity_id")
+  changes        Json?
+  ipAddress      String?  @map("ip_address")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
