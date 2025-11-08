@@ -173,8 +173,8 @@ export class AuthService {
     };
 
     return jwt.sign(payload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn,
-    });
+      expiresIn: config.jwt.expiresIn as string,
+    } as any);
   }
 
   private generateRefreshToken(user: any): string {
@@ -187,8 +187,8 @@ export class AuthService {
     };
 
     return jwt.sign(payload, config.jwt.refreshSecret, {
-      expiresIn: config.jwt.refreshExpiresIn,
-    });
+      expiresIn: config.jwt.refreshExpiresIn as string,
+    } as any);
   }
 
   verifyAccessToken(token: string): AuthenticatedUser {
