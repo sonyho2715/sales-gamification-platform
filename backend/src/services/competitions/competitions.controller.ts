@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
 import competitionsService from './competitions.service';
 import { CompetitionType, CompetitionMetric } from '@prisma/client';
 
@@ -7,9 +8,9 @@ class CompetitionsController {
    * POST /api/v1/competitions
    * Create a new competition
    */
-  async createCompetition(req: Request, res: Response) {
+  async createCompetition(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId } = req.user as any;
+      const { organizationId, id: userId } = req.user!;
       const { name, description, type, metric, startTime, endTime, prizeDescription, rules, locationIds } = req.body;
 
       if (!name || !type || !metric || !startTime || !endTime) {
@@ -49,9 +50,9 @@ class CompetitionsController {
    * GET /api/v1/competitions/active
    * Get active competitions
    */
-  async getActiveCompetitions(req: Request, res: Response) {
+  async getActiveCompetitions(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId } = req.user as any;
+      const { organizationId, id: userId } = req.user!;
 
       const competitions = await competitionsService.getActiveCompetitions(organizationId, userId);
 
@@ -72,9 +73,9 @@ class CompetitionsController {
    * GET /api/v1/competitions/:id
    * Get competition details
    */
-  async getCompetitionDetails(req: Request, res: Response) {
+  async getCompetitionDetails(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
 
       const competition = await competitionsService.getCompetitionDetails(id, organizationId);
@@ -103,9 +104,9 @@ class CompetitionsController {
    * GET /api/v1/competitions/:id/leaderboard
    * Get competition leaderboard
    */
-  async getLeaderboard(req: Request, res: Response) {
+  async getLeaderboard(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
       const { limit } = req.query;
 
@@ -132,9 +133,9 @@ class CompetitionsController {
    * POST /api/v1/competitions/:id/start
    * Start a competition
    */
-  async startCompetition(req: Request, res: Response) {
+  async startCompetition(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
 
       const result = await competitionsService.startCompetition(id, organizationId);
@@ -156,9 +157,9 @@ class CompetitionsController {
    * POST /api/v1/competitions/:id/end
    * End a competition
    */
-  async endCompetition(req: Request, res: Response) {
+  async endCompetition(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
 
       const result = await competitionsService.endCompetition(id, organizationId);
@@ -180,9 +181,9 @@ class CompetitionsController {
    * POST /api/v1/competitions/:id/update-scores
    * Update competition scores (real-time refresh)
    */
-  async updateScores(req: Request, res: Response) {
+  async updateScores(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
 
       const result = await competitionsService.updateCompetitionScores(id, organizationId);
@@ -204,9 +205,9 @@ class CompetitionsController {
    * POST /api/v1/competitions/templates/power-hour
    * Quick create: Power Hour competition
    */
-  async createPowerHour(req: Request, res: Response) {
+  async createPowerHour(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId } = req.user as any;
+      const { organizationId, id: userId } = req.user!;
       const { startTime } = req.body;
 
       if (!startTime) {
@@ -239,9 +240,9 @@ class CompetitionsController {
    * POST /api/v1/competitions/templates/fcp-friday
    * Quick create: FCP Friday competition
    */
-  async createFCPFriday(req: Request, res: Response) {
+  async createFCPFriday(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId } = req.user as any;
+      const { organizationId, id: userId } = req.user!;
       const { date } = req.body;
 
       if (!date) {

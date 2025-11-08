@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
 import coachingService from './coaching.service';
 import { CoachingStatus } from '@prisma/client';
 
@@ -7,9 +8,9 @@ class CoachingController {
    * GET /api/v1/coaching/recommendations
    * Generate coaching recommendations based on performance analysis
    */
-  async getRecommendations(req: Request, res: Response) {
+  async getRecommendations(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
 
       const recommendations = await coachingService.generateCoachingRecommendations(organizationId);
 
@@ -30,9 +31,9 @@ class CoachingController {
    * POST /api/v1/coaching/playbooks
    * Create coaching playbooks from recommendations
    */
-  async createPlaybooks(req: Request, res: Response) {
+  async createPlaybooks(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId } = req.user as any;
+      const { organizationId, id: userId } = req.user!;
 
       const playbooks = await coachingService.createPlaybooksFromRecommendations(organizationId, userId);
 
@@ -54,9 +55,9 @@ class CoachingController {
    * GET /api/v1/coaching/playbooks
    * Get coaching playbooks (optionally filter by manager or status)
    */
-  async getPlaybooks(req: Request, res: Response) {
+  async getPlaybooks(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId, role } = req.user as any;
+      const { organizationId, id: userId, role } = req.user!;
       const { status } = req.query;
 
       // Managers only see their assigned playbooks, admins see all
@@ -85,9 +86,9 @@ class CoachingController {
    * PATCH /api/v1/coaching/playbooks/:id/status
    * Update playbook status
    */
-  async updatePlaybookStatus(req: Request, res: Response) {
+  async updatePlaybookStatus(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
       const { status, note } = req.body;
 
@@ -117,9 +118,9 @@ class CoachingController {
    * POST /api/v1/coaching/playbooks/:id/notes
    * Add progress note to playbook
    */
-  async addProgressNote(req: Request, res: Response) {
+  async addProgressNote(req: AuthRequest, res: Response) {
     try {
-      const { organizationId } = req.user as any;
+      const { organizationId } = req.user!;
       const { id } = req.params;
       const { note } = req.body;
 
@@ -149,9 +150,9 @@ class CoachingController {
    * GET /api/v1/coaching/dashboard
    * Get coaching dashboard summary
    */
-  async getDashboard(req: Request, res: Response) {
+  async getDashboard(req: AuthRequest, res: Response) {
     try {
-      const { organizationId, id: userId, role } = req.user as any;
+      const { organizationId, id: userId, role } = req.user!;
 
       // Managers only see their assigned playbooks, admins see all
       const managerId = role === 'MANAGER' ? userId : undefined;
