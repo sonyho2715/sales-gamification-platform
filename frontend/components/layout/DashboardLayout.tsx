@@ -52,6 +52,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/morning-report', label: 'Morning Report' },
     { href: '/sales', label: 'Sales' },
     { href: '/leaderboard', label: 'Leaderboard' },
   ];

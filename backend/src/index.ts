@@ -13,6 +13,7 @@ import authController from './services/auth/auth.controller';
 import salesController from './services/sales/sales.controller';
 import performanceController from './services/performance/performance.controller';
 import goalsController from './services/goals/goals.controller';
+import reportsController from './services/reports/reports.controller';
 
 // Import Prisma for connection test
 import prisma from './config/database';
@@ -130,6 +131,9 @@ app.get('/api/v1/goals/:id', authenticate, goalsController.getGoal.bind(goalsCon
 app.get('/api/v1/goals/:id/progress', authenticate, goalsController.getGoalProgress.bind(goalsController));
 app.put('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), validateGoal, validate, goalsController.updateGoal.bind(goalsController));
 app.delete('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), goalsController.deleteGoal.bind(goalsController));
+
+// Reports routes
+app.get('/api/v1/reports/morning-report', authenticate, reportsController.getMorningReport.bind(reportsController));
 
 // Error handling
 app.use(notFoundHandler);
