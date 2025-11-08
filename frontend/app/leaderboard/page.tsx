@@ -218,7 +218,7 @@ export default function LeaderboardPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {leaderboard.map((entry, index) => {
-                      const isCurrentUser = entry.user.id === user.id;
+                      const isCurrentUser = entry.user.id === user?.id;
                       return (
                         <tr
                           key={entry.user.id}
