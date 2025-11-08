@@ -52,10 +52,13 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   }
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/morning-report', label: 'Morning Report' },
-    { href: '/sales', label: 'Sales' },
-    { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+    { href: '/morning-report', label: 'Morning Report', icon: 'chart' },
+    { href: '/sales', label: 'Sales', icon: 'list' },
+    { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' },
+    ...(user?.role === 'ADMIN' || user?.role === 'MANAGER'
+      ? [{ href: '/admin', label: 'Admin', icon: 'settings' }]
+      : []),
   ];
 
   return (

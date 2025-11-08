@@ -14,6 +14,8 @@ import salesController from './services/sales/sales.controller';
 import performanceController from './services/performance/performance.controller';
 import goalsController from './services/goals/goals.controller';
 import reportsController from './services/reports/reports.controller';
+import locationsController from './services/locations/locations.controller';
+import usersController from './services/users/users.controller';
 
 // Import Prisma for connection test
 import prisma from './config/database';
@@ -134,6 +136,12 @@ app.delete('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), goa
 
 // Reports routes
 app.get('/api/v1/reports/morning-report', authenticate, reportsController.getMorningReport.bind(reportsController));
+
+// Locations routes
+app.get('/api/v1/locations', authenticate, locationsController.getLocations.bind(locationsController));
+
+// Users routes
+app.get('/api/v1/users', authenticate, usersController.getUsers.bind(usersController));
 
 // Error handling
 app.use(notFoundHandler);
