@@ -125,9 +125,13 @@ model Sale {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   items        SaleItem[]
 
+  @@index([organizationId])
+  @@index([userId])
+  @@index([locationId])
   @@index([saleDate])
   @@index([userId, saleDate])
   @@index([locationId, saleDate])
+  @@index([organizationId, saleDate])
   @@map("sales")
 }
 
@@ -176,7 +180,11 @@ model Goal {
   creator      User?        @relation("GoalCreator", fields: [createdBy], references: [id])
 
   @@unique([userId, goalType, periodStart, periodEnd])
+  @@index([organizationId])
+  @@index([locationId])
+  @@index([userId])
   @@index([userId, periodStart, periodEnd])
+  @@index([periodStart, periodEnd])
   @@map("goals")
 }
 
@@ -263,9 +271,13 @@ model DailyPerformance {
   location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, performanceDate])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([locationId])
   @@index([performanceDate])
   @@index([userId, performanceDate])
   @@index([locationId, performanceDate])
+  @@index([organizationId, performanceDate])
   @@map("daily_performance")
 }
 

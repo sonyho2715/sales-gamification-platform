@@ -5,6 +5,8 @@ import { config } from './config/environment';
 import logger from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authenticate, authorize } from './middleware/auth.middleware';
+import { validate, validateSale, validateLogin, validateRegistration, validateGoal } from './middleware/validation.middleware';
+import { authLimiter, apiLimiter } from './middleware/rate-limit.middleware';
 
 // Controllers
 import authController from './services/auth/auth.controller';
@@ -35,10 +37,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check
+// Health check (no rate limiting)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Apply general API rate limiting to all routes
+app.use('/api', apiLimiter);
 
 // Temporary migration endpoint (remove after setup)
 app.get('/setup-database', async (req, res) => {
@@ -73,18 +78,18 @@ app.get('/setup-database', async (req, res) => {
 });
 
 // Auth routes
-app.post('/api/v1/auth/login', authController.login.bind(authController));
-app.post('/api/v1/auth/register', authController.register.bind(authController));
+app.post('/api/v1/auth/login', authLimiter, validateLogin, validate, authController.login.bind(authController));
+app.post('/api/v1/auth/register', authLimiter, validateRegistration, validate, authController.register.bind(authController));
 app.post('/api/v1/auth/refresh', authController.refreshToken.bind(authController));
 app.post('/api/v1/auth/logout', authenticate, authController.logout.bind(authController));
 app.get('/api/v1/auth/me', authenticate, authController.getMe.bind(authController));
 
 // Sales routes
-app.post('/api/v1/sales', authenticate, salesController.createSale.bind(salesController));
+app.post('/api/v1/sales', authenticate, validateSale, validate, salesController.createSale.bind(salesController));
 app.get('/api/v1/sales', authenticate, salesController.getSales.bind(salesController));
 app.get('/api/v1/sales/daily-summary', authenticate, salesController.getDailySummary.bind(salesController));
 app.get('/api/v1/sales/:id', authenticate, salesController.getSale.bind(salesController));
-app.put('/api/v1/sales/:id', authenticate, salesController.updateSale.bind(salesController));
+app.put('/api/v1/sales/:id', authenticate, validateSale, validate, salesController.updateSale.bind(salesController));
 app.delete('/api/v1/sales/:id', authenticate, authorize('ADMIN', 'MANAGER'), salesController.deleteSale.bind(salesController));
 
 // Performance routes
@@ -93,11 +98,11 @@ app.get('/api/v1/performance/user/:userId?', authenticate, performanceController
 app.post('/api/v1/performance/calculate', authenticate, authorize('ADMIN', 'MANAGER'), performanceController.calculateDailyPerformance.bind(performanceController));
 
 // Goals routes
-app.post('/api/v1/goals', authenticate, authorize('ADMIN', 'MANAGER'), goalsController.createGoal.bind(goalsController));
+app.post('/api/v1/goals', authenticate, authorize('ADMIN', 'MANAGER'), validateGoal, validate, goalsController.createGoal.bind(goalsController));
 app.get('/api/v1/goals', authenticate, goalsController.getGoals.bind(goalsController));
 app.get('/api/v1/goals/:id', authenticate, goalsController.getGoal.bind(goalsController));
 app.get('/api/v1/goals/:id/progress', authenticate, goalsController.getGoalProgress.bind(goalsController));
-app.put('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), goalsController.updateGoal.bind(goalsController));
+app.put('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), validateGoal, validate, goalsController.updateGoal.bind(goalsController));
 app.delete('/api/v1/goals/:id', authenticate, authorize('ADMIN', 'MANAGER'), goalsController.deleteGoal.bind(goalsController));
 
 // Error handling

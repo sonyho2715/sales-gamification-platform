@@ -5,6 +5,7 @@ import { config } from '../../config/environment';
 import { AuthenticationError, NotFoundError, ValidationError } from '../../utils/errors';
 import { AuthenticatedUser, LoginDto } from '../../types';
 import logger from '../../utils/logger';
+import { validatePasswordStrength } from '../../utils/password';
 
 export class AuthService {
   async login(loginDto: LoginDto) {
@@ -68,6 +69,12 @@ export class AuthService {
     organizationId: string;
     locationId?: string;
   }) {
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(userData.password);
+    if (!passwordValidation.valid) {
+      throw new ValidationError(passwordValidation.message!);
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: userData.email },
