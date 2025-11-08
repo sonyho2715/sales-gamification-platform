@@ -40,6 +40,35 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Temporary migration endpoint (remove after setup)
+app.get('/setup-database', async (req, res) => {
+  try {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    res.write('Starting database setup...\n\n');
+
+    // Run migrations
+    res.write('Running migrations...\n');
+    const { stdout: migrateOut } = await execAsync('npx prisma migrate deploy');
+    res.write(migrateOut + '\n');
+    res.write('✅ Migrations complete!\n\n');
+
+    // Run seed
+    res.write('Seeding database...\n');
+    const { stdout: seedOut } = await execAsync('npm run seed');
+    res.write(seedOut + '\n');
+    res.write('✅ Seed complete!\n\n');
+
+    res.write('🎉 Database setup successful!');
+    res.end();
+  } catch (error: any) {
+    res.write('❌ Error: ' + error.message);
+    res.end();
+  }
+});
+
 // Auth routes
 app.post('/api/v1/auth/login', authController.login.bind(authController));
 app.post('/api/v1/auth/register', authController.register.bind(authController));
