@@ -16,6 +16,8 @@ import goalsController from './services/goals/goals.controller';
 import reportsController from './services/reports/reports.controller';
 import locationsController from './services/locations/locations.controller';
 import usersController from './services/users/users.controller';
+import competitionsController from './services/competitions/competitions.controller';
+import coachingController from './services/coaching/coaching.controller';
 
 // Import Prisma for connection test
 import prisma from './config/database';
@@ -142,6 +144,31 @@ app.get('/api/v1/locations', authenticate, locationsController.getLocations.bind
 
 // Users routes
 app.get('/api/v1/users', authenticate, usersController.getUsers.bind(usersController));
+app.get('/api/v1/users/:id', authenticate, usersController.getUserById.bind(usersController));
+app.post('/api/v1/users', authenticate, authorize('ADMIN'), usersController.createUser.bind(usersController));
+app.put('/api/v1/users/:id', authenticate, authorize('ADMIN'), usersController.updateUser.bind(usersController));
+app.delete('/api/v1/users/:id', authenticate, authorize('ADMIN'), usersController.deleteUser.bind(usersController));
+app.post('/api/v1/users/:id/reset-password', authenticate, authorize('ADMIN'), usersController.resetPassword.bind(usersController));
+app.post('/api/v1/users/:id/activate', authenticate, authorize('ADMIN'), usersController.activateUser.bind(usersController));
+
+// Competitions routes
+app.post('/api/v1/competitions', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.createCompetition.bind(competitionsController));
+app.get('/api/v1/competitions/active', authenticate, competitionsController.getActiveCompetitions.bind(competitionsController));
+app.get('/api/v1/competitions/:id', authenticate, competitionsController.getCompetitionDetails.bind(competitionsController));
+app.get('/api/v1/competitions/:id/leaderboard', authenticate, competitionsController.getLeaderboard.bind(competitionsController));
+app.post('/api/v1/competitions/:id/start', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.startCompetition.bind(competitionsController));
+app.post('/api/v1/competitions/:id/end', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.endCompetition.bind(competitionsController));
+app.post('/api/v1/competitions/:id/update-scores', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.updateScores.bind(competitionsController));
+app.post('/api/v1/competitions/templates/power-hour', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.createPowerHour.bind(competitionsController));
+app.post('/api/v1/competitions/templates/fcp-friday', authenticate, authorize('ADMIN', 'MANAGER'), competitionsController.createFCPFriday.bind(competitionsController));
+
+// Coaching routes
+app.get('/api/v1/coaching/recommendations', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.getRecommendations.bind(coachingController));
+app.post('/api/v1/coaching/playbooks', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.createPlaybooks.bind(coachingController));
+app.get('/api/v1/coaching/playbooks', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.getPlaybooks.bind(coachingController));
+app.patch('/api/v1/coaching/playbooks/:id/status', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.updatePlaybookStatus.bind(coachingController));
+app.post('/api/v1/coaching/playbooks/:id/notes', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.addProgressNote.bind(coachingController));
+app.get('/api/v1/coaching/dashboard', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.getDashboard.bind(coachingController));
 
 // Error handling
 app.use(notFoundHandler);

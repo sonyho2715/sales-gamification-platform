@@ -57,7 +57,10 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { href: '/sales', label: 'Sales', icon: 'list' },
     { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' },
     ...(user?.role === 'ADMIN' || user?.role === 'MANAGER'
-      ? [{ href: '/admin', label: 'Admin', icon: 'settings' }]
+      ? [
+          { href: '/coaching', label: 'Coaching', icon: 'coaching' },
+          { href: '/admin', label: 'Admin', icon: 'settings' },
+        ]
       : []),
   ];
 

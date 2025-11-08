@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import SalesDataEntry from '@/components/admin/SalesDataEntry';
 import GoalsManagement from '@/components/admin/GoalsManagement';
@@ -32,6 +33,45 @@ export default function AdminPage() {
           Manage sales data, set goals, and configure your sales tracking system
         </p>
       </div>
+
+      {/* Quick Links for Admin */}
+      {user?.role === 'ADMIN' && (
+        <div className="mb-6">
+          <Link
+            href="/admin/users"
+            className="block bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:border-indigo-500 hover:shadow-xl transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-indigo-100 p-3 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                    User Management
+                  </h3>
+                  <p className="text-gray-600">Add, edit, or remove team members</p>
+                </div>
+              </div>
+              <svg
+                className="w-6 h-6 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* Tab Navigation */}
       <div className="bg-white shadow rounded-lg mb-6">

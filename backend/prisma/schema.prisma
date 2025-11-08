@@ -19,16 +19,18 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  locations    Location[]
-  users        User[]
-  sales        Sale[]
-  goals        Goal[]
-  starDays     StarDay[]
-  bonusPools   BonusPool[]
-  reports      Report[]
-  categories   ProductCategory[]
-  auditLogs    AuditLog[]
-  dailyPerf    DailyPerformance[]
+  locations         Location[]
+  users             User[]
+  sales             Sale[]
+  goals             Goal[]
+  starDays          StarDay[]
+  bonusPools        BonusPool[]
+  reports           Report[]
+  categories        ProductCategory[]
+  auditLogs         AuditLog[]
+  dailyPerf         DailyPerformance[]
+  competitions      Competition[]
+  coachingPlaybooks CoachingPlaybook[]
 
   @@map("organizations")
 }
@@ -143,6 +145,9 @@ model SaleItem {
   quantity          Int      @default(1)
   unitPrice         Decimal  @db.Decimal(10, 2) @map("unit_price")
   totalPrice        Decimal  @db.Decimal(10, 2) @map("total_price")
+  costPrice         Decimal? @db.Decimal(10, 2) @map("cost_price") // NEW: For margin tracking
+  marginAmount      Decimal? @db.Decimal(10, 2) @map("margin_amount") // NEW: Calculated margin
+  marginPercentage  Decimal? @db.Decimal(5, 2) @map("margin_percentage") // NEW: Margin %
   createdAt         DateTime @default(now()) @map("created_at")
 
   sale            Sale             @relation(fields: [saleId], references: [id], onDelete: Cascade)
@@ -260,6 +265,8 @@ model DailyPerformance {
   salesPerHour   Decimal  @default(0) @db.Decimal(10, 2) @map("sales_per_hour")
   transactionCount Int    @default(0) @map("transaction_count")
   averageSale    Decimal  @default(0) @db.Decimal(10, 2) @map("average_sale")
+  totalMargin    Decimal  @default(0) @db.Decimal(10, 2) @map("total_margin") // NEW: Gross margin
+  marginPercentage Decimal @default(0) @db.Decimal(5, 2) @map("margin_percentage") // NEW: Margin %
   isStarDay      Boolean  @default(false) @map("is_star_day")
   rankInLocation Int?     @map("rank_in_location")
   rankInOrganization Int? @map("rank_in_organization")
@@ -320,4 +327,154 @@ model AuditLog {
   user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ============================================
+// LIVE COMPETITIONS
+// ============================================
+
+enum CompetitionType {
+  POWER_HOUR      // Short burst (1-2 hours)
+  DAILY_BLITZ     // Full day competition
+  BRACKET         // Tournament elimination
+  TEAM_CHALLENGE  // Store vs Store
+  STREAK          // Consecutive days goal
+
+  @@map("competition_type")
+}
+
+enum CompetitionStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+
+  @@map("competition_status")
+}
+
+enum CompetitionMetric {
+  TOTAL_SALES
+  FCP_PERCENTAGE
+  TRANSACTION_COUNT
+  AVERAGE_SALE
+  GROSS_MARGIN
+  SALES_PER_HOUR
+
+  @@map("competition_metric")
+}
+
+model Competition {
+  id              String            @id @default(uuid())
+  organizationId  String            @map("organization_id")
+  name            String
+  description     String?
+  type            CompetitionType
+  metric          CompetitionMetric
+  status          CompetitionStatus @default(SCHEDULED)
+  startTime       DateTime          @map("start_time")
+  endTime         DateTime          @map("end_time")
+  prizeDescription String?          @map("prize_description")
+  rules           Json              @default("{}") // Competition rules/config
+  locationIds     String[]          @map("location_ids") // Empty = all locations
+  createdBy       String            @map("created_by")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  organization          Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  participants          CompetitionParticipant[]
+  leaderboardEntries    CompetitionLeaderboard[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([startTime, endTime])
+  @@map("competitions")
+}
+
+model CompetitionParticipant {
+  id             String   @id @default(uuid())
+  competitionId  String   @map("competition_id")
+  userId         String   @map("user_id")
+  locationId     String   @map("location_id")
+  enrolled       Boolean  @default(true)
+  currentScore   Decimal  @default(0) @db.Decimal(10, 2) @map("current_score")
+  finalRank      Int?     @map("final_rank")
+  prizeWon       String?  @map("prize_won")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, userId])
+  @@index([competitionId])
+  @@index([userId])
+  @@map("competition_participants")
+}
+
+model CompetitionLeaderboard {
+  id             String   @id @default(uuid())
+  competitionId  String   @map("competition_id")
+  userId         String   @map("user_id")
+  rank           Int
+  score          Decimal  @db.Decimal(10, 2)
+  metadata       Json     @default("{}") // Additional stats
+  snapshotAt     DateTime @default(now()) @map("snapshot_at")
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@index([competitionId, rank])
+  @@index([competitionId, userId])
+  @@map("competition_leaderboard")
+}
+
+// ============================================
+// COACHING PLAYBOOKS
+// ============================================
+
+enum CoachingTrigger {
+  PERFORMANCE_DROP       // Sales/metrics declining
+  BELOW_GOAL            // Not hitting goals
+  LOW_FCP_RATE          // FCP attachment too low
+  LOW_CONVERSION        // Few transactions
+  MANUAL                // Manager manually triggered
+
+  @@map("coaching_trigger")
+}
+
+enum CoachingStatus {
+  RECOMMENDED   // AI detected need
+  ASSIGNED      // Manager assigned to rep
+  IN_PROGRESS   // Coaching started
+  COMPLETED     // Coaching finished
+  DISMISSED     // Manager dismissed recommendation
+
+  @@map("coaching_status")
+}
+
+model CoachingPlaybook {
+  id              String          @id @default(uuid())
+  organizationId  String          @map("organization_id")
+  userId          String          @map("user_id")
+  managerId       String?         @map("manager_id")
+  trigger         CoachingTrigger
+  status          CoachingStatus  @default(RECOMMENDED)
+  priority        Int             @default(5) @db.SmallInt // 1-10, 10=urgent
+  title           String
+  description     String
+  diagnosisData   Json            @map("diagnosis_data") // Performance metrics
+  recommendedActions Json         @map("recommended_actions") // Action items
+  progressNotes   Json            @default("[]") @map("progress_notes") // Manager notes
+  dueDate         DateTime?       @db.Date @map("due_date")
+  completedAt     DateTime?       @map("completed_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([managerId])
+  @@index([status])
+  @@index([trigger])
+  @@index([priority])
+  @@map("coaching_playbooks")
 }
