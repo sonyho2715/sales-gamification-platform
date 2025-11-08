@@ -256,7 +256,7 @@ export default function EditUserModal({ user, onClose, onUserUpdated }: Props) {
             </Button>
             <Button
               type="submit"
-              loading={loading}
+              isLoading={loading}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
             >
               Save Changes

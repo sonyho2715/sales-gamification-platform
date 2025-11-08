@@ -231,7 +231,7 @@ export default function CreateUserModal({ onClose, onUserCreated }: Props) {
             </Button>
             <Button
               type="submit"
-              loading={loading}
+              isLoading={loading}
               className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
             >
               Create User
