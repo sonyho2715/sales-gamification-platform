@@ -202,6 +202,13 @@ async function main() {
 
   logger.info(`Created ${users.length} users`);
 
+  // Clean up existing sales and goals to allow fresh seed
+  logger.info('Cleaning up existing sales and goals...');
+  await prisma.saleItem.deleteMany({});
+  await prisma.sale.deleteMany({});
+  await prisma.goal.deleteMany({});
+  logger.info('Cleanup complete');
+
   // Create sample sales for today
   const today = new Date();
   const salespeople = users.filter(u => u.role === 'SALESPERSON');
