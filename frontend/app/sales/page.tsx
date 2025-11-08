@@ -1,28 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { salesApi, CreateSaleData } from '@/lib/api/sales';
 import { Sale } from '@/types';
 import { format } from 'date-fns';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/Button';
+import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 export default function SalesPage() {
-  const router = useRouter();
-  const { user, isAuthenticated, isLoading, fetchUser, logout } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [meta, setMeta] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      router.push('/login');
-    } else if (isAuthenticated && !user) {
-      fetchUser();
-    }
-  }, [isAuthenticated, isLoading, user, router, fetchUser]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -37,102 +31,34 @@ export default function SalesPage() {
       setSales(result.sales);
       setMeta(result.meta);
     } catch (error) {
+      toast.error('Failed to load sales');
       console.error('Failed to load sales:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
-
   const handleSaleCreated = () => {
     setShowModal(false);
     loadSales();
+    toast.success('Sale created successfully!');
   };
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Sales Management</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Welcome back, {user.firstName} {user.lastName}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">{user.role}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <DashboardLayout title="Sales Management">
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-900">All Sales</h2>
+        <Button onClick={() => setShowModal(true)} variant="primary">
+          + Add New Sale
+        </Button>
+      </div>
 
-      {/* Navigation */}
-      <nav className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <a
-              href="/dashboard"
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/sales"
-              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
-            >
-              Sales
-            </a>
-            <a
-              href="/leaderboard"
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            >
-              Leaderboard
-            </a>
-          </div>
+      {/* Sales Table */}
+      {loading ? (
+        <div className="text-center py-12">
+          <LoadingSpinnerInline size="lg" />
+          <p className="mt-4 text-gray-600">Loading sales...</p>
         </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">All Sales</h2>
-          <button
-            onClick={() => setShowModal(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium"
-          >
-            + Add New Sale
-          </button>
-        </div>
-
-        {/* Sales Table */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading sales...</p>
-          </div>
         ) : sales.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <p className="text-gray-500">No sales found. Create your first sale!</p>
@@ -246,17 +172,16 @@ export default function SalesPage() {
             )}
           </div>
         )}
-      </main>
 
       {/* Add Sale Modal */}
-      {showModal && (
+      {showModal && user && (
         <SaleFormModal
           user={user}
           onClose={() => setShowModal(false)}
           onSuccess={handleSaleCreated}
         />
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 

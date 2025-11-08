@@ -4,7 +4,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
-import { useEffect } from 'react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useEffect, useState } from 'react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, logout, fetchUser } = useAuthStore();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
@@ -24,9 +27,23 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     }
   }, [isAuthenticated, isLoading, user, router, fetchUser]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.push('/login');
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutDialog(false);
+    }
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutDialog(false);
   };
 
   if (isLoading || !user) {
@@ -55,7 +72,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
               <span className="text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-full">
                 {user.role}
               </span>
-              <Button onClick={handleLogout} variant="primary" size="sm">
+              <Button onClick={handleLogoutClick} variant="primary" size="sm">
                 Logout
               </Button>
             </div>
@@ -89,6 +106,19 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showLogoutDialog}
+        title="Confirm Logout"
+        message="Are you sure you want to logout? You will need to login again to access your account."
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+        isLoading={isLoggingOut}
+      />
     </div>
   );
 }

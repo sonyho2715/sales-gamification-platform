@@ -1,29 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { performanceApi } from '@/lib/api/performance';
 import { LeaderboardEntry } from '@/types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/Button';
+import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'];
 
 export default function LeaderboardPage() {
-  const router = useRouter();
-  const { user, isAuthenticated, isLoading, fetchUser, logout } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState<'organization' | 'location'>('organization');
   const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month'>('today');
-
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      router.push('/login');
-    } else if (isAuthenticated && !user) {
-      fetchUser();
-    }
-  }, [isAuthenticated, isLoading, user, router, fetchUser]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -57,158 +51,81 @@ export default function LeaderboardPage() {
       const data = await performanceApi.getLeaderboard(filters);
       setLeaderboard(data);
     } catch (error) {
+      toast.error('Failed to load leaderboard');
       console.error('Failed to load leaderboard:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
+  // Prepare chart data - memoized for performance
+  const barChartData = useMemo(() =>
+    leaderboard.slice(0, 10).map((entry) => ({
+      name: `${entry.user.firstName} ${entry.user.lastName}`,
+      sales: Number(entry.totalSales),
+      fcp: Number(entry.fcpPercentage),
+    })),
+    [leaderboard]
+  );
 
-  // Prepare chart data
-  const barChartData = leaderboard.slice(0, 10).map((entry) => ({
-    name: `${entry.user.firstName} ${entry.user.lastName}`,
-    sales: Number(entry.totalSales),
-    fcp: Number(entry.fcpPercentage),
-  }));
-
-  const pieChartData = leaderboard.slice(0, 8).map((entry, index) => ({
-    name: `${entry.user.firstName} ${entry.user.lastName}`,
-    value: Number(entry.totalSales),
-    fill: COLORS[index % COLORS.length],
-  }));
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const pieChartData = useMemo(() =>
+    leaderboard.slice(0, 8).map((entry, index) => ({
+      name: `${entry.user.firstName} ${entry.user.lastName}`,
+      value: Number(entry.totalSales),
+      fill: COLORS[index % COLORS.length],
+    })),
+    [leaderboard]
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Leaderboard</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Welcome back, {user.firstName} {user.lastName}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">{user.role}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <nav className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <a
-              href="/dashboard"
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/sales"
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            >
-              Sales
-            </a>
-            <a
-              href="/leaderboard"
-              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
-            >
-              Leaderboard
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setScope('organization')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                scope === 'organization'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Organization
-            </button>
-            <button
-              onClick={() => setScope('location')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                scope === 'location'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              My Location
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setTimeframe('today')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                timeframe === 'today'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => setTimeframe('week')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                timeframe === 'week'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              This Week
-            </button>
-            <button
-              onClick={() => setTimeframe('month')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                timeframe === 'month'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              This Month
-            </button>
-          </div>
+    <DashboardLayout title="Leaderboard">
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setScope('organization')}
+            variant={scope === 'organization' ? 'primary' : 'secondary'}
+          >
+            Organization
+          </Button>
+          <Button
+            onClick={() => setScope('location')}
+            variant={scope === 'location' ? 'primary' : 'secondary'}
+          >
+            My Location
+          </Button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading leaderboard...</p>
-          </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setTimeframe('today')}
+            variant={timeframe === 'today' ? 'primary' : 'secondary'}
+            size="sm"
+          >
+            Today
+          </Button>
+          <Button
+            onClick={() => setTimeframe('week')}
+            variant={timeframe === 'week' ? 'primary' : 'secondary'}
+            size="sm"
+          >
+            This Week
+          </Button>
+          <Button
+            onClick={() => setTimeframe('month')}
+            variant={timeframe === 'month' ? 'primary' : 'secondary'}
+            size="sm"
+          >
+            This Month
+          </Button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <LoadingSpinnerInline size="lg" />
+          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
+        </div>
         ) : leaderboard.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <p className="text-gray-500">No performance data available for this period.</p>
@@ -381,7 +298,6 @@ export default function LeaderboardPage() {
             </div>
           </>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }
