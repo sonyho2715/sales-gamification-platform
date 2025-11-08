@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import apiClient from '@/lib/api/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
@@ -128,27 +129,24 @@ export default function DashboardPage() {
         <div className="bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <a
+            <Link
               href="/sales"
               className="block p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
             >
               <h4 className="text-sm font-medium text-gray-900">View Sales</h4>
               <p className="mt-1 text-xs text-gray-500">See all sales transactions</p>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/leaderboard"
               className="block p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
             >
               <h4 className="text-sm font-medium text-gray-900">Leaderboard</h4>
               <p className="mt-1 text-xs text-gray-500">View team rankings</p>
-            </a>
-            <a
-              href="#"
-              className="block p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors opacity-50 cursor-not-allowed"
-            >
+            </Link>
+            <div className="block p-4 border-2 border-dashed border-gray-300 rounded-lg opacity-50 cursor-not-allowed">
               <h4 className="text-sm font-medium text-gray-900">Add Sale (Coming Soon)</h4>
               <p className="mt-1 text-xs text-gray-500">Create a new sale</p>
-            </a>
+            </div>
           </div>
         </div>
         </>

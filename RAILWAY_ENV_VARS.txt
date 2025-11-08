@@ -1,0 +1,27 @@
+===================================
+RAILWAY ENVIRONMENT VARIABLES
+Copy these into Railway backend service
+===================================
+
+NODE_ENV=production
+
+PORT=3001
+
+JWT_SECRET=v67JRkyAOALWtdChezFCQKRz8Byk1c6sICjA7TpXT7M=
+
+REFRESH_TOKEN_SECRET=rTuz4QcAp35FMmoqGC5RSCiChhs+0Ks9vvoQdHfhzDQ=
+
+JWT_EXPIRES_IN=15m
+
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+CORS_ORIGIN=*
+
+===================================
+IMPORTANT:
+1. For DATABASE_URL in Railway, use the reference:
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
+
+2. After Vercel deployment, update CORS_ORIGIN
+   to your actual Vercel URL
+===================================

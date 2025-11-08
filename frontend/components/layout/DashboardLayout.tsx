@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -86,7 +87,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className={`
@@ -99,7 +100,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 `}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
