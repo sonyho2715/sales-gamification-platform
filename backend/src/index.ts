@@ -77,6 +77,32 @@ app.get('/setup-database', async (req, res) => {
   }
 });
 
+// Safe migration endpoint - only updates schema without deleting data
+app.get('/migrate-schema', async (req, res) => {
+  try {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    res.write('Starting schema migration...\n\n');
+
+    // Push schema changes (indexes, etc.) to database
+    res.write('Applying schema changes to database...\n');
+    const { stdout: pushOut } = await execAsync('npx prisma db push --skip-generate');
+    res.write(pushOut + '\n');
+    res.write('✅ Schema migration complete!\n\n');
+
+    res.write('🎉 Database indexes and schema updates applied successfully!\n');
+    res.write('Note: Existing data was preserved.\n');
+    res.end();
+  } catch (error: any) {
+    res.write('❌ Error: ' + error.message + '\n');
+    if (error.stdout) res.write(error.stdout + '\n');
+    if (error.stderr) res.write(error.stderr + '\n');
+    res.end();
+  }
+});
+
 // Auth routes
 app.post('/api/v1/auth/login', authLimiter, validateLogin, validate, authController.login.bind(authController));
 app.post('/api/v1/auth/register', authLimiter, validateRegistration, validate, authController.register.bind(authController));
