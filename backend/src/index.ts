@@ -49,14 +49,15 @@ app.get('/setup-database', async (req, res) => {
 
     res.write('Starting database setup...\n\n');
 
-    // Run migrations
-    res.write('Running migrations...\n');
-    const { stdout: migrateOut } = await execAsync('npx prisma migrate deploy');
-    res.write(migrateOut + '\n');
-    res.write('✅ Migrations complete!\n\n');
+    // Push schema to database
+    res.write('Pushing schema to database...\n');
+    const { stdout: pushOut } = await execAsync('npx prisma db push --accept-data-loss');
+    res.write(pushOut + '\n');
+    res.write('✅ Schema pushed!\n\n');
 
-    // Run seed
-    res.write('Seeding database...\n');
+    // Run seed - compile and run
+    res.write('Compiling and seeding database...\n');
+    await execAsync('npm run build');
     const { stdout: seedOut } = await execAsync('npm run seed');
     res.write(seedOut + '\n');
     res.write('✅ Seed complete!\n\n');
@@ -64,7 +65,9 @@ app.get('/setup-database', async (req, res) => {
     res.write('🎉 Database setup successful!');
     res.end();
   } catch (error: any) {
-    res.write('❌ Error: ' + error.message);
+    res.write('❌ Error: ' + error.message + '\n');
+    if (error.stdout) res.write(error.stdout + '\n');
+    if (error.stderr) res.write(error.stderr + '\n');
     res.end();
   }
 });

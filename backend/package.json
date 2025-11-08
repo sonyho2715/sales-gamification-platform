@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "seed": "ts-node src/scripts/seed.ts"
+    "seed": "node dist/scripts/seed.js",
+    "seed:dev": "ts-node src/scripts/seed.ts"
   },
   "keywords": ["sales", "gamification", "crm"],
   "author": "",
