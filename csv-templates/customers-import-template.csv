@@ -1,0 +1,9 @@
+first_name,last_name,phone,email,address,city,state,zip_code,notes
+Michael,Johnson,555-0123,michael.j@email.com,123 Main St,Los Angeles,CA,90001,Prefers morning delivery
+Emily,Davis,555-0124,emily.d@email.com,456 Oak Ave,San Francisco,CA,94102,Interested in bedroom furniture
+Robert,Wilson,555-0125,,789 Pine Rd,San Diego,CA,92101,Cash customer - no email
+Lisa,Martinez,555-0126,lisa.m@email.com,321 Elm St,Sacramento,CA,95814,Repeat customer - VIP
+David,Anderson,555-0127,david.a@email.com,654 Maple Dr,San Jose,CA,95110,Works from home - interested in office furniture
+Jennifer,Taylor,555-0128,jen.t@email.com,987 Cedar Ln,Fresno,CA,93650,Looking for dining room set
+Christopher,Thomas,555-0129,chris.t@email.com,147 Birch Ct,Long Beach,CA,90801,Budget conscious - likes sales
+Amanda,Garcia,555-0130,amanda.g@email.com,258 Spruce Way,Oakland,CA,94601,Interior designer - wholesale pricing

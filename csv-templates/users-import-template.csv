@@ -1,0 +1,5 @@
+email,first_name,last_name,role,location_code,hire_date,password
+james.wilson@store.com,James,Wilson,SALESPERSON,MAIN,2024-06-15,Welcome123!
+sophia.brown@store.com,Sophia,Brown,SALESPERSON,NORTH,2024-08-01,Welcome123!
+olivia.jones@store.com,Olivia,Jones,SALESPERSON,SOUTH,2024-09-10,Welcome123!
+william.davis@store.com,William,Davis,MANAGER,MAIN,2023-03-20,Welcome123!
