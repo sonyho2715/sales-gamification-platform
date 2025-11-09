@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import apiClient from '@/lib/api/client';
 import toast from 'react-hot-toast';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { EmptyUsersState } from '@/components/ui/EmptyState';
 import { format } from 'date-fns';
 
 interface User {
@@ -110,7 +112,11 @@ export default function UserManagementTable({ refreshKey, onEditUser }: Props) {
   };
 
   if (loading) {
-    return <LoadingSpinnerInline size="lg" />;
+    return <SkeletonTable rows={8} />;
+  }
+
+  if (users.length === 0 && !filter.search && !filter.role && !filter.active) {
+    return <EmptyUsersState onAddUser={() => {}} />;
   }
 
   return (

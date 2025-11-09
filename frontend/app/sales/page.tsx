@@ -8,6 +8,8 @@ import { format } from 'date-fns';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { EmptySalesState } from '@/components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 export default function SalesPage() {
@@ -55,14 +57,9 @@ export default function SalesPage() {
 
       {/* Sales Table */}
       {loading ? (
-        <div className="text-center py-12">
-          <LoadingSpinnerInline size="lg" />
-          <p className="mt-4 text-gray-600">Loading sales...</p>
-        </div>
+        <SkeletonTable rows={10} />
         ) : sales.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500">No sales found. Create your first sale!</p>
-          </div>
+          <EmptySalesState onAddSale={() => setShowModal(true)} />
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">

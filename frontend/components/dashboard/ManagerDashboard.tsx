@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import apiClient from '@/lib/api/client';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import StatsCard from '@/components/morning-report/StatsCard';
+import PerformanceBarChart from '@/components/charts/PerformanceBarChart';
 
 export default function ManagerDashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -35,7 +37,7 @@ export default function ManagerDashboard() {
   };
 
   if (loading) {
-    return <LoadingSpinnerInline size="lg" />;
+    return <SkeletonDashboard />;
   }
 
   const { summary } = dashboardData || {};
@@ -210,6 +212,21 @@ export default function ManagerDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Charts Section */}
+      {summary?.byUser && summary.byUser.length > 0 && (
+        <div className="mb-8">
+          <PerformanceBarChart
+            title="Team Performance Today"
+            data={summary.byUser
+              .sort((a: any, b: any) => b.totalSales - a.totalSales)
+              .map((p: any) => ({
+                name: `${p.user.firstName} ${p.user.lastName.charAt(0)}.`,
+                sales: Number(p.totalSales),
+              }))}
+          />
+        </div>
+      )}
 
       {/* Top Performers */}
       {summary?.byUser && summary.byUser.length > 0 && (

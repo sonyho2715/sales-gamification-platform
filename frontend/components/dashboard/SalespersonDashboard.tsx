@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import apiClient from '@/lib/api/client';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import StatsCard from '@/components/morning-report/StatsCard';
 import { useAuthStore } from '@/lib/store/authStore';
+import SalesTrendChart from '@/components/charts/SalesTrendChart';
+import GoalProgressChart from '@/components/charts/GoalProgressChart';
 
 export default function SalespersonDashboard() {
   const { user } = useAuthStore();
@@ -37,7 +40,7 @@ export default function SalespersonDashboard() {
   };
 
   if (loading) {
-    return <LoadingSpinnerInline size="lg" />;
+    return <SkeletonDashboard />;
   }
 
   const { performance, leaderboard } = dashboardData || {};

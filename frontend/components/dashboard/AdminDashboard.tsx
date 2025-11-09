@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import apiClient from '@/lib/api/client';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonDashboard } from '@/components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import StatsCard from '@/components/morning-report/StatsCard';
+import PerformanceBarChart from '@/components/charts/PerformanceBarChart';
+import FCPPieChart from '@/components/charts/FCPPieChart';
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -37,10 +40,11 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return <LoadingSpinnerInline size="lg" />;
+    return <SkeletonDashboard />;
   }
 
   const { summary, goals, users } = dashboardData || {};
+  const fcpPercentage = summary?.summary?.fcpPercentage || 0;
   const activeUsers = users?.filter((u: any) => u.active)?.length || 0;
   const totalGoals = goals?.length || 0;
 
@@ -221,6 +225,27 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Charts Section */}
+      {summary?.byUser && summary.byUser.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <PerformanceBarChart
+            title="Top 5 Performers Today"
+            data={summary.byUser
+              .sort((a: any, b: any) => b.totalSales - a.totalSales)
+              .slice(0, 5)
+              .map((p: any) => ({
+                name: `${p.user.firstName} ${p.user.lastName.charAt(0)}.`,
+                sales: Number(p.totalSales),
+                goal: 0,
+              }))}
+          />
+          <FCPPieChart
+            fcpPercentage={fcpPercentage}
+            title="Overall FCP Rate Today"
+          />
+        </div>
+      )}
 
       {/* Top Performers */}
       {summary?.byUser && summary.byUser.length > 0 && (

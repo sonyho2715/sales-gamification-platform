@@ -8,6 +8,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonLeaderboard } from '@/components/ui/Skeleton';
+import { EmptyLeaderboardState } from '@/components/ui/EmptyState';
 import toast from 'react-hot-toast';
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6'];
@@ -122,14 +124,9 @@ export default function LeaderboardPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12">
-          <LoadingSpinnerInline size="lg" />
-          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
-        </div>
+        <SkeletonLeaderboard />
         ) : leaderboard.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500">No performance data available for this period.</p>
-          </div>
+          <EmptyLeaderboardState />
         ) : (
           <>
             {/* Charts Section */}

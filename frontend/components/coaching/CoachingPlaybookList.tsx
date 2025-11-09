@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import apiClient from '@/lib/api/client';
 import toast from 'react-hot-toast';
 import { LoadingSpinnerInline } from '@/components/ui/LoadingSpinner';
+import { SkeletonPlaybookCard } from '@/components/ui/Skeleton';
+import { EmptyCoachingPlaybooksState } from '@/components/ui/EmptyState';
 import { format } from 'date-fns';
 
 interface Playbook {
@@ -118,7 +120,17 @@ export default function CoachingPlaybookList({ refreshKey, onRefresh }: Props) {
   };
 
   if (loading) {
-    return <LoadingSpinnerInline size="lg" />;
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonPlaybookCard key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  if (playbooks.length === 0 && !statusFilter) {
+    return <EmptyCoachingPlaybooksState />;
   }
 
   return (
