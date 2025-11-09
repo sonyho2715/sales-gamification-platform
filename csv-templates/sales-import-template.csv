@@ -1,10 +1,10 @@
 transaction_number,sale_date,sale_time,salesperson_email,customer_first_name,customer_last_name,customer_phone,customer_email,product_name,product_category,quantity,unit_price,cost_price,fcp_amount,hours_worked,notes
-TXN-2025-001,2025-01-15,14:30,john.smith@demo.com,Michael,Johnson,555-0123,michael.j@email.com,Sectional Sofa,Living Room,1,2499.99,1200.00,299.99,8.0,Customer requested white glove delivery
-TXN-2025-001,2025-01-15,14:30,john.smith@demo.com,Michael,Johnson,555-0123,michael.j@email.com,Coffee Table,Living Room,1,399.99,180.00,0,8.0,
-TXN-2025-002,2025-01-15,16:45,sarah.johnson@demo.com,Emily,Davis,555-0124,emily.d@email.com,King Bed Frame,Bedroom,1,1299.99,600.00,149.99,8.0,
-TXN-2025-002,2025-01-15,16:45,sarah.johnson@demo.com,Emily,Davis,555-0124,emily.d@email.com,Nightstand Set,Bedroom,2,299.99,120.00,0,8.0,Matching set - oak finish
-TXN-2025-003,2025-01-16,10:15,mike.davis@demo.com,Robert,Wilson,555-0125,,Dining Table,Dining Room,1,899.99,400.00,99.99,7.5,Floor model - 10% discount applied
-TXN-2025-003,2025-01-16,10:15,mike.davis@demo.com,Robert,Wilson,555-0125,,Dining Chairs,Dining Room,6,149.99,60.00,0,7.5,Set of 6 chairs
-TXN-2025-004,2025-01-16,13:20,john.smith@demo.com,Lisa,Martinez,555-0126,lisa.m@email.com,Recliner Sofa,Living Room,1,1799.99,850.00,199.99,8.0,Power reclining feature
-TXN-2025-005,2025-01-17,11:00,emily.wilson@demo.com,David,Anderson,555-0127,david.a@email.com,Office Desk,Home Office,1,599.99,280.00,0,6.0,L-shaped desk
-TXN-2025-005,2025-01-17,11:00,emily.wilson@demo.com,David,Anderson,555-0127,david.a@email.com,Office Chair,Home Office,1,299.99,130.00,39.99,6.0,Ergonomic with lumbar support
+TXN-2025-001,2025-11-05,14:30,john.smith@demo.com,Michael,Johnson,555-555-0123,michael.j@email.com,Sectional Sofa,Living Room,1,2499.99,1200.00,299.99,8.0,Customer requested white glove delivery
+TXN-2025-001,2025-11-05,14:30,john.smith@demo.com,Michael,Johnson,555-555-0123,michael.j@email.com,Coffee Table,Living Room,1,399.99,180.00,0,8.0,
+TXN-2025-002,2025-11-05,16:45,sarah.johnson@demo.com,Emily,Davis,555-555-0124,emily.d@email.com,King Bed Frame,Bedroom,1,1299.99,600.00,149.99,8.0,
+TXN-2025-002,2025-11-05,16:45,sarah.johnson@demo.com,Emily,Davis,555-555-0124,emily.d@email.com,Nightstand Set,Bedroom,2,299.99,120.00,0,8.0,Matching set - oak finish
+TXN-2025-003,2025-11-06,10:15,mike.davis@demo.com,Robert,Wilson,555-555-0125,,Dining Table,Dining Room,1,899.99,400.00,99.99,7.5,Floor model - 10% discount applied
+TXN-2025-003,2025-11-06,10:15,mike.davis@demo.com,Robert,Wilson,555-555-0125,,Dining Chairs,Dining Room,6,149.99,60.00,0,7.5,Set of 6 chairs
+TXN-2025-004,2025-11-06,13:20,john.smith@demo.com,Lisa,Martinez,555-555-0126,lisa.m@email.com,Recliner Sofa,Living Room,1,1799.99,850.00,199.99,8.0,Power reclining feature
+TXN-2025-005,2025-11-07,11:00,emily.wilson@demo.com,David,Anderson,555-555-0127,david.a@email.com,Office Desk,Home Office,1,599.99,280.00,0,6.0,L-shaped desk
+TXN-2025-005,2025-11-07,11:00,emily.wilson@demo.com,David,Anderson,555-555-0127,david.a@email.com,Office Chair,Home Office,1,299.99,130.00,39.99,6.0,Ergonomic with lumbar support

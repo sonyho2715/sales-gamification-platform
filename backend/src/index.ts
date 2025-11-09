@@ -18,6 +18,7 @@ import locationsController from './services/locations/locations.controller';
 import usersController from './services/users/users.controller';
 import competitionsController from './services/competitions/competitions.controller';
 import coachingController from './services/coaching/coaching.controller';
+import importRoutes from './services/import/import.routes';
 
 // Import Prisma for connection test
 import prisma from './config/database';
@@ -169,6 +170,9 @@ app.get('/api/v1/coaching/playbooks', authenticate, authorize('ADMIN', 'MANAGER'
 app.patch('/api/v1/coaching/playbooks/:id/status', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.updatePlaybookStatus.bind(coachingController));
 app.post('/api/v1/coaching/playbooks/:id/notes', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.addProgressNote.bind(coachingController));
 app.get('/api/v1/coaching/dashboard', authenticate, authorize('ADMIN', 'MANAGER'), coachingController.getDashboard.bind(coachingController));
+
+// Import routes (CSV bulk upload)
+app.use('/api/v1/import', importRoutes);
 
 // Error handling
 app.use(notFoundHandler);
