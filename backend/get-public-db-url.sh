@@ -1,0 +1,25 @@
+#!/bin/bash
+# Script to get the public PostgreSQL URL from Railway
+
+echo "🔍 Getting Public PostgreSQL URL from Railway..."
+echo ""
+echo "Please follow these steps:"
+echo ""
+echo "1. Go to Railway Dashboard: https://railway.app/dashboard"
+echo "2. Open your 'Sales Gamification Platform' project"
+echo "3. Look for the PostgreSQL service (database icon)"
+echo "4. Click on the PostgreSQL service"
+echo "5. Go to the 'Connect' tab"
+echo "6. Look for 'Public Database URL' or 'External Connection URL'"
+echo "7. Copy the entire connection string"
+echo ""
+echo "It should look like:"
+echo "  postgresql://postgres:PASSWORD@containers-us-west-XXX.railway.app:XXXX/railway"
+echo ""
+echo "8. Run the migration with that URL:"
+echo "   export DATABASE_URL=\"paste-the-url-here\""
+echo "   npx prisma migrate deploy"
+echo ""
+echo "Opening Railway dashboard for you..."
+sleep 2
+open "https://railway.app/dashboard"
